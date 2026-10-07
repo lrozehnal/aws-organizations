@@ -1,0 +1,1 @@
+This is just me preparing for AWS Security Specialty and creating AWS organiations using terraform - nothing serious
