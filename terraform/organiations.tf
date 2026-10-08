@@ -9,6 +9,9 @@ resource "aws_organizations_organization" "org" {
   ]
 
   feature_set = "ALL"
+  enabled_policy_types = [
+    "SERVICE_CONTROL_POLICY",
+  ]
 }
 
 
@@ -67,9 +70,9 @@ resource "aws_organizations_organizational_unit" "red" {
 
 
 
-/*
 
-data "aws_iam_policy_document" "example" {
+
+data "aws_iam_policy_document" "allowall" {
   statement {
     effect    = "Allow"
     actions   = ["*"]
@@ -77,19 +80,19 @@ data "aws_iam_policy_document" "example" {
   }
 }
 
-resource "aws_organizations_policy" "example" {
-  name    = "example"
+resource "aws_organizations_policy" "PolicyAllowAll" {
+  name    = "AllowAll"
   provider = aws.eu-west-1
-  content = data.aws_iam_policy_document.example.json
+  content = data.aws_iam_policy_document.allowall.json
 }
 
 
 resource "aws_organizations_policy_attachment" "red_policy_attach" {
   provider = aws.eu-west-1
-  policy_id = aws_organizations_policy.example.id
+  policy_id = aws_organizations_policy.PolicyAllowAll.id
   target_id = aws_organizations_organizational_unit.red.id
 }
-*/
+
 
 
 ## Let me create  another three AWS accounts 'blue' 'green' and 'red' for testing purposes. I will create the accounts in the 'eu-west-1' region.
