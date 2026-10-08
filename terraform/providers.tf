@@ -69,7 +69,7 @@ provider "aws" {
   region = "eu-west-1"
   profile = "mplexia-root"
   assume_role {
-    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-red.id}:role/OrganizationAccountAccessRole"
+    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-red.id}:role/AssumeRole"
   }
 }
 
@@ -78,7 +78,7 @@ provider "aws" {
   region = "eu-west-1"
   profile = "mplexia-root"
   assume_role {
-    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-blue.id}:role/OrganizationAccountAccessRole"
+    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-blue.id}:role/AssumeRole"
   }
 }
 
@@ -87,6 +87,6 @@ provider "aws" {
   region = "eu-west-1"
   profile = "mplexia-root"
   assume_role {
-    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-green.id}:role/OrganizationAccountAccessRole"
+    role_arn = "arn:aws:iam::${aws_organizations_account.mplexia-green.id}:role/AssumeRole"
   }
 }

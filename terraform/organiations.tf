@@ -24,66 +24,195 @@ resource "aws_iam_organizations_features" "root_access" {
 
 
 
-resource "aws_iam_user_policy" "assume_member_roles" {
+resource "aws_iam_user_policy" "assume_AccessRole" {
   provider = aws.eu-west-1
-  name     = "assume-organization-account-access"
+  name     = "AssumeRole"
   user ="iamadmin"
-#user     = "lrozehnal"
-
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
       Action   = "sts:AssumeRole"
-      Resource = "arn:aws:iam::*:role/OrganizationAccountAccessRole"
+      Resource = "arn:aws:iam::*:role/AccessRole"
     }]
   })
 }
 
+resource "aws_organizations_organizational_unit" "bluegreen" {
+  name      = "Blue_and_Green"
+  provider = aws.eu-west-1
+  parent_id = aws_organizations_organization.org.roots[0].id
+}
 
 
-## Let me create three accounts 'blue' 'green' and 'red' for testing purposes. I will create the accounts in the 'eu-west-1' region.
+resource "aws_organizations_organizational_unit" "blue" {
+  name      = "Blue"
+  provider = aws.eu-west-1
+  parent_id = aws_organizations_organizational_unit.bluegreen.id
+}
+
+resource "aws_organizations_organizational_unit" "green" {
+  name      = "Green"
+  provider = aws.eu-west-1
+  parent_id = aws_organizations_organizational_unit.bluegreen.id
+}
+
+resource "aws_organizations_organizational_unit" "red" {
+  name      = "Red"
+  provider = aws.eu-west-1
+  parent_id = aws_organizations_organization.org.roots[0].id
+}
+
+
+
+
+
+/*
+
+data "aws_iam_policy_document" "example" {
+  statement {
+    effect    = "Allow"
+    actions   = ["*"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_organizations_policy" "example" {
+  name    = "example"
+  provider = aws.eu-west-1
+  content = data.aws_iam_policy_document.example.json
+}
+
+
+resource "aws_organizations_policy_attachment" "red_policy_attach" {
+  provider = aws.eu-west-1
+  policy_id = aws_organizations_policy.example.id
+  target_id = aws_organizations_organizational_unit.red.id
+}
+*/
+
+
+## Let me create  another three AWS accounts 'blue' 'green' and 'red' for testing purposes. I will create the accounts in the 'eu-west-1' region.
+
+
 
 resource "aws_organizations_account" "mplexia-blue" {
   provider = aws.eu-west-1
   name      = "mplexia-blue"
-  email     = "l.rozehnal+mplexia-blue@mplexia.com"
-  role_name = "OrganizationAccountAccessRole"
+  email     = "l.rozehnal+mplexiablue@mplexia.com"
+  role_name = "AssumeRole"
+  parent_id = aws_organizations_organizational_unit.blue.id 
 }
 
 resource "aws_organizations_account" "mplexia-green" {
   provider = aws.eu-west-1
   name      = "mplexia-green"
-  email     = "l.rozehnal+mplexia-green@mplexia.com"
-  role_name = "OrganizationAccountAccessRole"
+  email     = "l.rozehnal+mplexiagreen@mplexia.com"
+  role_name = "AssumeRole"
+  parent_id = aws_organizations_organizational_unit.green.id 
 }
 
 resource "aws_organizations_account" "mplexia-red" {
   provider = aws.eu-west-1
   name      = "mplexia-red"
-  email     = "l.rozehnal+mplexia-red@mplexia.com"
-  role_name = "OrganizationAccountAccessRole"
+  email     = "l.rozehnal+mplexiared@mplexia.com"
+  role_name = "AssumeRole"
+  parent_id = aws_organizations_organizational_unit.red.id 
 }
 
 
 
 ### TESTING THE RESOURCES
 
+
 resource "aws_s3_bucket" "red" {
   provider = aws.mplexia-red-eu-west-1
-  bucket   = "mplexia-red-eu-west-1-bucket"
+  bucket   = "mplexia-red-eu-west-1-test-bucket"
 }
+
+
 
 resource "aws_s3_bucket" "green" {
   provider = aws.mplexia-green-eu-west-1
-  bucket   = "mplexia-green-eu-west-1-bucket"
+  bucket   = "mplexia-green-eu-west-1-test-bucket"
 }
 
 resource "aws_s3_bucket" "blue" {
   provider = aws.mplexia-blue-eu-west-1
-  bucket   = "mplexia-blue-eu-west-1-bucket"
+  bucket   = "mplexia-blue-eu-west-1-test-bucket"
 }
 
-/*
-*/
 
+
+/**/
+
+
+### FOLLOWING IS NEEDED IN ORDER TO ALLOW THIS IF THE ACCOUNT IS INVITED (I GUESS)
+
+
+/*
+data "aws_caller_identity" "current" {
+    provider = aws.eu-west-1
+} 
+
+
+resource "aws_iam_role" "org_access_red" {
+  provider = aws.mplexia-red-eu-west-1
+  name = "AccessRoleGUI"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"}
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role" "org_access_green" {
+  provider = aws.mplexia-green-eu-west-1
+  name = "AccessRoleGUI"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"}
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role" "org_access_blue" {
+  provider = aws.mplexia-blue-eu-west-1
+  name = "AccessRoleGUI"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"}
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+ resource "aws_iam_role_policy_attachment" "admin_red" {                                                                                                                                                                                                                                                                        
+   provider   = aws.mplexia-red-eu-west-1                                                                                                                                                                                                                                                                                   
+   role       = "AccessRoleGUI"                                                                                                                                                                                                                                                                                             
+   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"                                                                                                                                                                                                                                                               
+ }      
+
+ resource "aws_iam_role_policy_attachment" "admin_green" {                                                                                                                                                                                                                                                                        
+   provider   = aws.mplexia-green-eu-west-1                                                                                                                                                                                                                                                                                   
+   role       = "AccessRoleGUI"                                                                                                                                                                                                                                                                                             
+   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"                                                                                                                                                                                                                                                               
+ }      
+
+ resource "aws_iam_role_policy_attachment" "admin_blue" {                                                                                                                                                                                                                                                                        
+   provider   = aws.mplexia-blue-eu-west-1                                                                                                                                                                                                                                                                                   
+   role       = "AccessRoleGUI"                                                                                                                                                                                                                                                                                             
+   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"                                                                                                                                                                                                                                                               
+ }      
+
+
+
+*/
