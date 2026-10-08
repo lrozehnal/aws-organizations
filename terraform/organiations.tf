@@ -72,7 +72,7 @@ resource "aws_organizations_organizational_unit" "red" {
 
 
 
-data "aws_iam_policy_document" "allowall" {
+data "aws_iam_policy_document" "AllowAll" {
   statement {
     effect    = "Allow"
     actions   = ["*"]
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "allowall" {
 resource "aws_organizations_policy" "PolicyAllowAll" {
   name    = "AllowAll"
   provider = aws.eu-west-1
-  content = data.aws_iam_policy_document.allowall.json
+  content = data.aws_iam_policy_document.AllowAll.json
 }
 
 
