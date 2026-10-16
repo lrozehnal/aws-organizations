@@ -74,6 +74,40 @@ resource "aws_iam_role" "controltower_cloudtrail" {
   })
 }
 
+
+resource "aws_iam_role" "controltower_stackset" {
+  provider = aws.eu-west-1
+  name     = "AWSControlTowerStackSetRole-TF"
+  path     = "/service-role/"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "cloudformation.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+
+resource "aws_iam_role_policy" "controltower_stackset" {
+  provider = aws.eu-west-1
+  name     = "AssumeExecutionRole"
+  role     = aws_iam_role.controltower_stackset.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "sts:AssumeRole"
+      Resource = "arn:aws:iam::*:role/AWSControlTowerExecution"
+    }]
+  })
+}
+
+
+
 resource "aws_iam_role_policy_attachment" "controltower_cloudtrail" {
   provider   = aws.eu-west-1
   role       = aws_iam_role.controltower_cloudtrail.name
@@ -106,6 +140,10 @@ resource "aws_controltower_landing_zone" "tower_LZ" {
     config = {
       enabled   = true
       accountId = aws_organizations_account.audit.id
+      configurations = {
+        loggingBucket       = { retentionDays = 365 }
+        accessLoggingBucket = { retentionDays = 365 }
+  }
     }
 
     accessManagement = {
@@ -123,3 +161,70 @@ resource "aws_controltower_landing_zone" "tower_LZ" {
     delete = "120m"
   }
 }
+
+
+
+resource "aws_iam_role" "controltower_execution-red" {
+  provider = aws.mplexia-red-eu-west-1
+  name     = "AWSControlTowerExecution"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { AWS = "arn:aws:iam::159596244804:root" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "controltower_execution-red" {
+  provider   = aws.mplexia-red-eu-west-1
+  role       = aws_iam_role.controltower_execution-red.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+
+
+resource "aws_iam_role" "controltower_execution-blue" {
+  provider = aws.mplexia-blue-eu-west-1
+  name     = "AWSControlTowerExecution"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { AWS = "arn:aws:iam::159596244804:root" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "controltower_execution-blue" {
+  provider   = aws.mplexia-blue-eu-west-1
+  role       = aws_iam_role.controltower_execution-blue.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+
+
+resource "aws_iam_role" "controltower_execution-green" {
+  provider = aws.mplexia-green-eu-west-1
+  name     = "AWSControlTowerExecution"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { AWS = "arn:aws:iam::159596244804:root" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "controltower_execution-green" {
+  provider   = aws.mplexia-green-eu-west-1
+  role       = aws_iam_role.controltower_execution-blue.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
