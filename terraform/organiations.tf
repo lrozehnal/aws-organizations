@@ -6,6 +6,8 @@ resource "aws_organizations_organization" "org" {
     "cloudtrail.amazonaws.com",
     "config.amazonaws.com",
     "iam.amazonaws.com",
+    "controltower.amazonaws.com",
+    "member.org.stacksets.cloudformation.amazonaws.com",
   ]
 
   feature_set = "ALL"
@@ -40,6 +42,14 @@ resource "aws_iam_user_policy" "assume_AccessRole" {
     }]
   })
 }
+
+
+ ## HOW TO USE IT VIA CLI
+# 
+#  aws sts assume-role --profile=mplexia-root  --role-arn arn:aws:iam::206632867607:role/AssumeRole --role-session-name MySession
+# (I should get AccessKeyId, SecretAccessKey and SessionToken in the output of the above command and then I would use them to configure my aws cli as below)
+# 
+
 
 resource "aws_organizations_organizational_unit" "bluegreen" {
   name      = "Blue_and_Green"

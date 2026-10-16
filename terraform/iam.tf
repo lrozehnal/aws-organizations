@@ -1,3 +1,12 @@
+# Allow my manually configured iamadmin user to see the billing info
+
+resource "aws_iam_user_policy_attachment" "billing" {
+  provider   = aws.eu-west-1
+  user       = "iamadmin"
+  policy_arn = "arn:aws:iam::aws:policy/job-function/Billing"
+}
+
+  
 resource "aws_iam_user" "iamuser" {
   name = "iamuser"
   provider = aws.eu-west-1
@@ -73,7 +82,6 @@ resource "aws_iam_policy" "policy" {
     ]
   })
 }
-
 
 
 resource "aws_iam_group_policy_attachment" "attach" {
