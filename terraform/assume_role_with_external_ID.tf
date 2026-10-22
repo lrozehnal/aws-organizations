@@ -1,3 +1,4 @@
+/*
 data "aws_caller_identity" "current" {
     provider = aws.eu-west-1
 } 
@@ -42,3 +43,5 @@ resource "aws_iam_role" "access_red_with_external_id" {
 
 
 
+
+*/

@@ -1,5 +1,6 @@
 # Allow my manually configured iamadmin user to see the billing info
 
+/*
 resource "aws_iam_user_policy_attachment" "billing" {
   provider   = aws.eu-west-1
   user       = "iamadmin"
@@ -94,3 +95,4 @@ resource "aws_iam_user_policy_attachment" "attach" {
   provider = aws.eu-west-1
   policy_arn = aws_iam_policy.policy.arn
 }
+*/

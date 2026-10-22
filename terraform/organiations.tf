@@ -16,7 +16,6 @@ resource "aws_organizations_organization" "org" {
   ]
 }
 
-
 resource "aws_iam_organizations_features" "root_access" {
   provider = aws.eu-west-1
   enabled_features = [
@@ -28,11 +27,10 @@ resource "aws_iam_organizations_features" "root_access" {
 
 
 
-
 resource "aws_iam_user_policy" "assume_AccessRole" {
   provider = aws.eu-west-1
   name     = "AssumeRole"
-  user ="iamadmin"
+  user     = "iamadmin"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -43,6 +41,19 @@ resource "aws_iam_user_policy" "assume_AccessRole" {
   })
 }
 
+/*
+
+resource "aws_organizations_organizational_unit" "ous" {
+  for_each = local.OUs
+  provider  = aws.eu-west-1
+  name      = each.value.name
+  parent_id = try(each.value.parent, null) == null ? aws_organizations_organization.org.roots[0].id : aws_organizations_organizational_unit.ous[each.value.parent].id
+}
+
+*/
+
+
+/*
 
  ## HOW TO USE IT VIA CLI
 # 
@@ -112,25 +123,28 @@ resource "aws_organizations_policy_attachment" "red_policy_attach" {
 resource "aws_organizations_account" "mplexia-blue" {
   provider = aws.eu-west-1
   name      = "mplexia-blue"
-  email     = "l.rozehnal+mplexiablue@mplexia.com"
+  email     = "l.rozehnal+mplexiablue3@mplexia.com"
   role_name = "AssumeRole"
   parent_id = aws_organizations_organizational_unit.blue.id 
+  close_on_deletion = true
 }
 
 resource "aws_organizations_account" "mplexia-green" {
   provider = aws.eu-west-1
   name      = "mplexia-green"
-  email     = "l.rozehnal+mplexiagreen@mplexia.com"
+  email     = "l.rozehnal+mplexiagreen3@mplexia.com"
   role_name = "AssumeRole"
   parent_id = aws_organizations_organizational_unit.green.id 
+  close_on_deletion = true
 }
 
 resource "aws_organizations_account" "mplexia-red" {
   provider = aws.eu-west-1
   name      = "mplexia-red"
-  email     = "l.rozehnal+mplexiared@mplexia.com"
+  email     = "l.rozehnal+mplexiared3@mplexia.com"
   role_name = "AssumeRole"
   parent_id = aws_organizations_organizational_unit.red.id 
+  close_on_deletion = true
 }
 
 

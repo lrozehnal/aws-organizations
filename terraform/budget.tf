@@ -1,3 +1,4 @@
+/* 
 resource "aws_budgets_budget" "budget" {
   name              = "budget-monthly"
   provider = aws.eu-west-1
@@ -28,3 +29,5 @@ resource "aws_budgets_budget" "budget" {
     Tag2 = "Value2"
   }
 }
+
+*/

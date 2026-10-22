@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create  S3 bucket and IAM role and allow the role to access the S3 bucket
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: cf-s3-bucket
+    Description: Initial S3 bucket's name's string
+
+Resources:
+  CFS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${BucketName}-${AWS::AccountId}-${AWS::Region}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CFRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CFRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CFrole-S3-FullAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource:
+                  - !GetAtt CFS3Bucket.Arn
+                  - !Sub '${CFS3Bucket.Arn}/*'
+              - Effect: Allow
+                Action: s3:ListAllMyBuckets
+                Resource: "*"
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref CFS3Bucket
+
+  RoleName:
+    Description: Name of the IAM role
+    Value: !Ref CFRole
+
+  RoleARN:
+    Description: ARN address of the IAM role
+    Value: !GetAtt CFRole.Arn

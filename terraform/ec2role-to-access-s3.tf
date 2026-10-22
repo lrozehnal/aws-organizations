@@ -1,3 +1,4 @@
+/*
 
 resource "aws_s3_bucket" "ec2bucket" {
   provider = aws.eu-west-2
@@ -73,3 +74,4 @@ resource "aws_iam_instance_profile" "ec2-role-allow-s3-profile" {
 }
 
 
+*/

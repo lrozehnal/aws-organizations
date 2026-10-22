@@ -1,0 +1,15 @@
+organization_name: "mplexia.com"
+OUs: 
+  security:
+    name: Security
+  red:
+    name: Red
+  blueandgreen:
+    name: blueandgreen
+  blue:
+    name: Blue
+    parent: blueandgreen
+  green:
+    name: Green
+    parent: blueandgreen
+ 

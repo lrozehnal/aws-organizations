@@ -1,3 +1,4 @@
+/*
 resource "aws_organizations_organizational_unit" "security" {
   provider  = aws.eu-west-1
   name      = "Security"
@@ -10,6 +11,7 @@ resource "aws_organizations_account" "log_archive" {
   email     = "l.rozehnal+log-archive@mplexia.com"
   role_name = "OrganizationAccountAccessRole"
   parent_id = aws_organizations_organizational_unit.security.id
+  close_on_deletion = true
 }
 
 resource "aws_organizations_account" "audit" {
@@ -18,6 +20,7 @@ resource "aws_organizations_account" "audit" {
   email     = "l.rozehnal+audit@mplexia.com"
   role_name = "OrganizationAccountAccessRole"
   parent_id = aws_organizations_organizational_unit.security.id
+  close_on_deletion = true
 }
 
 
@@ -228,3 +231,99 @@ resource "aws_iam_role_policy_attachment" "controltower_execution-green" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
+
+
+resource "aws_controltower_baseline" "red" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.red.arn
+
+  depends_on = [aws_iam_role.controltower_execution-red]
+}
+
+
+resource "aws_controltower_baseline" "bluegreen" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.bluegreen.arn
+
+  depends_on = [aws_iam_role.controltower_execution-green, aws_iam_role.controltower_execution-blue]
+}
+
+
+resource "aws_controltower_baseline" "green" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.green.arn
+
+  depends_on = [aws_iam_role.controltower_execution-green, aws_iam_role.controltower_execution-blue]
+}
+
+
+
+resource "aws_controltower_baseline" "blue" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.blue.arn
+
+  depends_on = [aws_iam_role.controltower_execution-green, aws_iam_role.controltower_execution-blue]
+}
+
+
+
+/*
+
+resource "aws_controltower_baseline" "blue" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.blue.arn
+
+  depends_on = [aws_iam_role.controltower_execution-blue]
+}
+
+resource "aws_controltower_baseline" "green" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.green.arn
+
+  depends_on = [aws_iam_role.controltower_execution-green]
+}
+
+*/
+
+
+
+/*
+
+resource "aws_organizations_organizational_unit" "sandbox" {
+  provider  = aws.eu-west-1
+  name      = "Sandbox"
+  parent_id = aws_organizations_organization.org.roots[0].id
+}
+
+resource "aws_controltower_baseline" "sandbox" {
+  provider = aws.eu-west-1
+
+  baseline_identifier = "arn:aws:controltower:eu-west-1::baseline/17BSJV3IGJ2QSGA2"
+  baseline_version    = "5.0"
+  target_identifier   = aws_organizations_organizational_unit.sandbox.arn
+
+  depends_on = [
+    aws_iam_role.controltower_execution-red,
+    aws_iam_role.controltower_execution-blue,
+    aws_iam_role.controltower_execution-green,
+  ]
+}
+*/
